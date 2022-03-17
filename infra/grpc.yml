@@ -1,0 +1,61 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: grpc-deployment
+  labels:
+    app: grpc-helloworld
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: grpc-helloworld
+  template:
+    metadata:
+      labels:
+        app: grpc-helloworld
+    spec:
+      containers:
+        - name: grpc-helloworld
+          image: public.ecr.aws/r3u6g8k0/grpc-greeter:latest
+          ports:
+            - containerPort: 50051
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: grpc-service
+spec:
+  selector:
+    app: grpc-helloworld
+  type: ClusterIP
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 50051
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    nginx.ingress.kubernetes.io/backend-protocol: "GRPC"
+  name: grpc-ingress
+  namespace: default
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: demo.localhost
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: grpc-service
+                port:
+                  number: 80
+  tls:
+    - secretName: tls-secret
+      hosts:
+        - demo.localhost
+---

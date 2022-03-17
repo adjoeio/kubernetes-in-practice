@@ -1,0 +1,34 @@
+kind: Cluster
+apiVersion: kind.x-k8s.io/v1alpha4
+name: demo
+
+# nodes defaults to simply 1 control-plane that also acts as a worker
+# we want to be closer to a real-life scenario, so we configure a control-plane and 3 workers
+nodes:
+  - role: control-plane
+    kubeadmConfigPatches:
+      - |
+        kind: InitConfiguration
+        nodeRegistration:
+          kubeletExtraArgs:
+            node-labels: "ingress-ready=true"
+    extraPortMappings:
+      - containerPort: 80
+        hostPort: 80
+        protocol: TCP
+      - containerPort: 443
+        hostPort: 443
+        protocol: TCP
+  - role: worker
+    labels:
+      kubernetes.io/os: linux
+  - role: worker
+    labels:
+      kubernetes.io/os: linux
+  - role: worker
+    labels:
+      kubernetes.io/os: linux
+
+networking:
+  apiServerAddress: "127.0.0.1"
+  apiServerPort: 8080

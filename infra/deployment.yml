@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: foo-deployment
+  labels:
+    app: echo-foo
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: echo-foo
+  template:
+    metadata:
+      labels:
+        app: echo-foo
+    spec:
+      containers:
+        - name: echo-foo
+          image: hashicorp/http-echo:0.2.3
+          ports:
+            - containerPort: 5678
+          args:
+            - "-text=foo"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bar-deployment
+  labels:
+    app: echo-bar
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: echo-bar
+  template:
+    metadata:
+      labels:
+        app: echo-bar
+    spec:
+      containers:
+        - name: echo-bar
+          image: hashicorp/http-echo:0.2.3
+          ports:
+            - containerPort: 5678
+          args:
+            - "-text=bar"
+---
